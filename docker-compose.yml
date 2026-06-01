@@ -1,0 +1,28 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: job-tracker-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: jobtracker
+      POSTGRES_USER: ${SPRING_DATASOURCE_USERNAME}
+      POSTGRES_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  app:
+    build: .
+    container_name: job-tracker-api
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/jobtracker
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+    depends_on:
+      - postgres
+
+volumes:
+  postgres-data:
