@@ -1,5 +1,6 @@
-package com.jobtracker.api.security;
+package com.jobtracker.gateway;
 
+import com.jobtracker.jwt.JwtService;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

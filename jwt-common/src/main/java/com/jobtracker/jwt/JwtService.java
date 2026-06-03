@@ -1,4 +1,4 @@
-package com.jobtracker.api.security;
+package com.jobtracker.jwt;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
