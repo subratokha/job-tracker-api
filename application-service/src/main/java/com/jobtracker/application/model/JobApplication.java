@@ -1,4 +1,4 @@
-package com.jobtracker.api.model;
+package com.jobtracker.application.model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -29,7 +29,6 @@ public class JobApplication {
     private ApplicationStatus status;
     @Column(length = 1000)
     private String notes;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @Column(nullable = false)
+    private Long userId;
 }

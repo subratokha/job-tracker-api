@@ -16,6 +16,6 @@ RUN mvn -pl user-service -am clean package -DskipTests
 FROM eclipse-temurin:21-jre
 WORKDIR /app
 LABEL maintainer="subratokha@gmail.com"
-LABEL description="Job Tracker API - Spring Boot REST API for job application tracking"
+LABEL description="User Service application"
 COPY --from=build /app/user-service/target/user-service-0.0.1-SNAPSHOT.jar app.jar
 ENTRYPOINT ["java", "-jar", "app.jar"]

@@ -1,6 +1,7 @@
-package com.jobtracker.api.dto;
+package com.jobtracker.application.dto;
 
-import com.jobtracker.api.model.ApplicationStatus;
+
+import com.jobtracker.application.model.ApplicationStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 

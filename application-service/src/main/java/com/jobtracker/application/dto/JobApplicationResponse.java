@@ -1,7 +1,8 @@
-package com.jobtracker.api.dto;
+package com.jobtracker.application.dto;
 
-import com.jobtracker.api.model.ApplicationStatus;
-import com.jobtracker.api.model.JobApplication;
+
+import com.jobtracker.application.model.ApplicationStatus;
+import com.jobtracker.application.model.JobApplication;
 
 import java.time.LocalDate;
 

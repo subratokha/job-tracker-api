@@ -50,16 +50,6 @@ public class UserService {
         return new AuthResponse(token);
     }
 
-    public User getCurrentAuthenticatedUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new UnauthorizedException();
-        }
-        String email = authentication.getName();
-        return userRepository.findByEmail(email)
-                .orElseThrow(UnauthorizedException::new);
-    }
-
     private User mapToEntity(RegisterRequest registerRequest) {
         return User.builder()
                 .email(registerRequest.email())
@@ -69,6 +59,4 @@ public class UserService {
                 .role(Role.ROLE_USER)
                 .build();
     }
-
-
 }

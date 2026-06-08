@@ -1,4 +1,4 @@
-package com.jobtracker.api.dto;
+package com.jobtracker.application.dto;
 
 import java.time.LocalDateTime;
 

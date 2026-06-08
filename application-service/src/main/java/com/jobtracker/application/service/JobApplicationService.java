@@ -1,11 +1,11 @@
-package com.jobtracker.api.service;
+package com.jobtracker.application.service;
 
-import com.jobtracker.api.dto.JobApplicationRequest;
-import com.jobtracker.api.dto.JobApplicationResponse;
-import com.jobtracker.api.exception.ResourceNotFoundException;
-import com.jobtracker.api.model.JobApplication;
-import com.jobtracker.api.model.User;
-import com.jobtracker.api.repository.JobApplicationRepository;
+
+import com.jobtracker.application.dto.JobApplicationRequest;
+import com.jobtracker.application.dto.JobApplicationResponse;
+import com.jobtracker.application.exception.ResourceNotFoundException;
+import com.jobtracker.application.model.JobApplication;
+import com.jobtracker.application.repository.JobApplicationRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,52 +15,48 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class JobApplicationService {
     private final JobApplicationRepository jobApplicationRepository;
-    private final UserService userService;
 
-    public JobApplicationService(JobApplicationRepository jobApplicationRepository, UserService userService) {
+    public JobApplicationService(JobApplicationRepository jobApplicationRepository) {
         this.jobApplicationRepository = jobApplicationRepository;
-        this.userService = userService;
     }
 
     @Transactional
-    public JobApplicationResponse createJobApplication(JobApplicationRequest request) {
-        User loggedinUser = userService.getCurrentAuthenticatedUser();
+    public JobApplicationResponse createJobApplication(JobApplicationRequest request, Long userId) {
         JobApplication entity = mapRequestToEntity(request, null);
-        entity.setUser(loggedinUser);
+        entity.setUserId(userId);
         JobApplication saved = jobApplicationRepository.save(entity);
         return new JobApplicationResponse(saved);
     }
 
 
-    public JobApplicationResponse getJobApplication(Long jobApplicationId) {
-        JobApplication jobApplication = getCurrentUserApplication(jobApplicationId);
+    public JobApplicationResponse getJobApplication(Long jobApplicationId, Long userId) {
+        JobApplication jobApplication = getCurrentUserApplication(jobApplicationId, userId);
         return new JobApplicationResponse(jobApplication);
     }
 
     @Transactional
-    public void updateJobApplication(Long jobApplicationId, JobApplicationRequest request) {
-        JobApplication existing = getCurrentUserApplication(jobApplicationId);
+    public void updateJobApplication(Long jobApplicationId, JobApplicationRequest request, Long userId) {
+        JobApplication existing = getCurrentUserApplication(jobApplicationId, userId);
         mapRequestToEntity(request, existing);
         jobApplicationRepository.save(existing);
     }
 
-    private JobApplication getCurrentUserApplication(Long jobApplicationId) {
-        User loggedinUser = userService.getCurrentAuthenticatedUser();
+    private JobApplication getCurrentUserApplication(Long jobApplicationId, Long userId) {
+
         return jobApplicationRepository
-                .findByIdAndUserId(jobApplicationId, loggedinUser.getId())
+                .findByIdAndUserId(jobApplicationId, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Job Application Not Found"));
     }
 
     @Transactional
-    public void deleteJobApplication(Long jobApplicationId) {
-        JobApplication existing = getCurrentUserApplication(jobApplicationId);
+    public void deleteJobApplication(Long jobApplicationId, Long userId) {
+        JobApplication existing = getCurrentUserApplication(jobApplicationId, userId);
         jobApplicationRepository.delete(existing);
     }
 
 
-    public List<JobApplicationResponse> getAllJobApplications() {
-        User loggedinUser = userService.getCurrentAuthenticatedUser();
-        return jobApplicationRepository.findAllByUserId(loggedinUser.getId())
+    public List<JobApplicationResponse> getAllJobApplications(Long userId) {
+        return jobApplicationRepository.findAllByUserId(userId)
                 .stream()
                 .map(JobApplicationResponse::new)
                 .toList();

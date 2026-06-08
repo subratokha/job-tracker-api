@@ -9,7 +9,7 @@ services:
       POSTGRES_USER: ${USER_SERVICE_DB_USERNAME}
       POSTGRES_PASSWORD: ${USER_SERVICE_DB_PASSWORD}
     volumes:
-      - postgres-data:/var/lib/postgresql/data
+      - postgres-user-data:/var/lib/postgresql/data
 
   user-service-app:
     build:
@@ -26,5 +26,31 @@ services:
     depends_on:
       - postgres-user-service
 
+  postgres-application-service:
+    image: postgres:16
+    container_name: postgres-application-service
+    ports:
+      - "5434:5432"
+    environment:
+      POSTGRES_DB: application_service
+      POSTGRES_USER: ${APPLICATION_SERVICE_DB_USERNAME}
+      POSTGRES_PASSWORD: ${APPLICATION_SERVICE_DB_PASSWORD}
+    volumes:
+      - postgres-application-data:/var/lib/postgresql/data
+
+  application-service-app:
+    build:
+      context: .
+      dockerfile: application-service/Dockerfile
+    container_name: application-service-app
+    ports:
+      - "8082:8082"
+    environment:
+      APPLICATION_SERVICE_DB_URL: jdbc:postgresql://postgres-application-service:5432/application_service
+      APPLICATION_SERVICE_DB_USERNAME: ${APPLICATION_SERVICE_DB_USERNAME}
+      APPLICATION_SERVICE_DB_PASSWORD: ${APPLICATION_SERVICE_DB_PASSWORD}
+    depends_on:
+      - postgres-application-service
 volumes:
-  postgres-data:
+  postgres-user-data:
+  postgres-application-data:

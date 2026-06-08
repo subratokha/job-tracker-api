@@ -1,4 +1,4 @@
-package com.jobtracker.api.model;
+package com.jobtracker.application.model;
 
 public enum ApplicationStatus {
     SAVED,
