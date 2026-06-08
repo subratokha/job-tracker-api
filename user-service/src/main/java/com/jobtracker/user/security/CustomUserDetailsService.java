@@ -1,7 +1,8 @@
-package com.jobtracker.api.security;
+package com.jobtracker.user.security;
 
-import com.jobtracker.api.model.User;
-import com.jobtracker.api.repository.UserRepository;
+
+import com.jobtracker.user.model.User;
+import com.jobtracker.user.repository.UserRepository;
 import org.jspecify.annotations.NonNull;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

@@ -1,4 +1,4 @@
-package com.jobtracker.api.model;
+package com.jobtracker.user.model;
 
 import jakarta.persistence.*;
 import lombok.*;

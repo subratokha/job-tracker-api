@@ -1,4 +1,4 @@
-package com.jobtracker.api.dto.auth;
+package com.jobtracker.user.dto;
 
 public record AuthResponse(
         String token

@@ -1,6 +1,6 @@
-package com.jobtracker.api.repository;
+package com.jobtracker.user.repository;
 
-import com.jobtracker.api.model.User;
+import com.jobtracker.user.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

@@ -1,15 +1,16 @@
-package com.jobtracker.api.service;
+package com.jobtracker.user.service;
 
-import com.jobtracker.api.dto.auth.AuthRequest;
-import com.jobtracker.api.dto.auth.AuthResponse;
-import com.jobtracker.api.dto.auth.RegisterRequest;
-import com.jobtracker.api.exception.InvalidCredentialsException;
-import com.jobtracker.api.exception.UnauthorizedException;
-import com.jobtracker.api.exception.UserAlreadyExistsException;
-import com.jobtracker.api.model.Role;
-import com.jobtracker.api.model.User;
-import com.jobtracker.api.repository.UserRepository;
-import com.jobtracker.api.security.JwtService;
+
+import com.jobtracker.jwt.JwtService;
+import com.jobtracker.user.dto.AuthRequest;
+import com.jobtracker.user.dto.AuthResponse;
+import com.jobtracker.user.dto.RegisterRequest;
+import com.jobtracker.user.exception.InvalidCredentialsException;
+import com.jobtracker.user.exception.UnauthorizedException;
+import com.jobtracker.user.exception.UserAlreadyExistsException;
+import com.jobtracker.user.model.Role;
+import com.jobtracker.user.model.User;
+import com.jobtracker.user.repository.UserRepository;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -45,7 +46,7 @@ public class UserService {
         if (!passwordEncoder.matches(authRequest.password(), user.getPassword())) {
             throw new InvalidCredentialsException();
         }
-        String token = jwtService.generateToken(authRequest.email());
+        String token = jwtService.generateToken(user.getEmail(), user.getId());
         return new AuthResponse(token);
     }
 

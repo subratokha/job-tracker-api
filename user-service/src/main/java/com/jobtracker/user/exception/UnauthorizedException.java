@@ -1,4 +1,4 @@
-package com.jobtracker.api.exception;
+package com.jobtracker.user.exception;
 
 public class UnauthorizedException extends RuntimeException {
     public UnauthorizedException() {

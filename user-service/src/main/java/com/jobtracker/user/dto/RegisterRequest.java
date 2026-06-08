@@ -1,4 +1,4 @@
-package com.jobtracker.api.dto.auth;
+package com.jobtracker.user.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

@@ -1,4 +1,4 @@
-package com.jobtracker.api.model;
+package com.jobtracker.user.model;
 
 public enum Role {
     ROLE_USER,
