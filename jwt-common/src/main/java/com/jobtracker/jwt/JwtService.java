@@ -28,12 +28,10 @@ public class JwtService {
                 .compact();
     }
 
-    public boolean validateToken(String token, String email) {
+    public boolean validateToken(String token) {
         try {
-            String emailFromToken = extractEmailFromToken(token);
-            Date expiration = extractExpirationFromToken(token);
-            Date now = new Date();
-            return !expiration.before(now) && email.equals(emailFromToken);
+            Claims claims = getClaims(token);
+            return !claims.getExpiration().before(new Date());
         } catch (Exception e) {
             return false;
         }
@@ -44,20 +42,14 @@ public class JwtService {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public String extractEmailFromToken(String token) {
-        return getPayload(token)
-                .getSubject();
+    public Long extractUserIdFromToken(String token) {
+        return ((Number) getClaims(token).get("userId")).longValue();
     }
 
-    private Claims getPayload(String token) {
+    private Claims getClaims(String token) {
         return Jwts.parser()
                 .verifyWith(getSigningKey())
                 .build().parseSignedClaims(token)
                 .getPayload();
-    }
-
-    private Date extractExpirationFromToken(String token) {
-        return getPayload(token)
-                .getExpiration();
     }
 }

@@ -36,4 +36,5 @@ build/
 ### Environment & Local Config ###
 .env
 .env.local
-application-local.properties
+**/application-local.properties
+**/application-local.yml
