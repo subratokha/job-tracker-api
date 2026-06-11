@@ -13,7 +13,7 @@ RUN mvn -pl application-service clean package -DskipTests
 #Stage 2 - runtime
 FROM eclipse-temurin:21-jre
 WORKDIR /app
-LABEL maintainer="subratokha@gmail.com"
+LABEL maintainer="shubrato1@gmail.com"
 LABEL description="Application Service Application"
 COPY --from=build /app/application-service/target/application-service-0.0.1-SNAPSHOT.jar app.jar
 ENTRYPOINT ["java", "-jar", "app.jar"]

@@ -1,0 +1,22 @@
+spring:
+  application:
+    name: gateway
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            - id: user-service
+              uri: ${USER_SERVICE_URL:http://localhost:8081}
+              predicates:
+                - Path=/auth/**
+            - id: application-service
+              uri: ${APPLICATION_SERVICE_URL:http://localhost:8082}
+              predicates:
+                - Path=/applications/**
+
+server:
+  port: 8080
+
+jwt:
+  secret: ${GATEWAY_JWT_SECRET:d8f2b1c9e4a7f6d0b5c8e2a1f9d4b7c3e6a0f8d2b5c9e1a4f7d0b3c6e9a2f5}
