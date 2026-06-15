@@ -5,21 +5,15 @@ A microservices-based REST API for tracking job applications, built with Spring 
 > **Monolith branch**: The original single-service implementation is preserved on the [`monolith-branch`](https://github.com/subratokha/job-tracker-api/tree/monolith-branch) branch — showing the architectural progression from monolith to microservices and the decisions that drove the split.
 
 ---
+## Architecture Overview
 
-## Architecture
+The application follows a microservices architecture with Spring Cloud Gateway acting as the single entry point. Authentication is centralized at the gateway using JWT validation, while each service owns its own database to maintain clear service boundaries and independent deployment.
 
-```
-Client
-  └── Gateway (port 8080) ── JWT validation, routing
-        ├── /auth/**         ──► User Service (port 8081)
-        │                         └── postgres-user-service
-        └── /applications/** ──► Application Service (port 8082)
-                                  └── postgres-application-service
-```
+![Job Tracker Architecture](images/architecture.png)
 
-### Key decisions
+### Architecture Decisions
 
-- **Gateway-level JWT validation** — the gateway is the sole security boundary. Downstream services trust the `X-User-Id` header injected by the gateway after token validation. Services contain no JWT logic.
+- **Gateway-level JWT validation** — the gateway is the external security boundary for API requests. Downstream services trust the `X-User-Id` header injected by the gateway after token validation. Services contain no JWT logic. Business-level authorization, such as ensuring users can only access their own job applications, remains inside the Application Service.
 - **Service-per-database isolation** — user-service and application-service each own a dedicated PostgreSQL instance. application-service references users by `userId` (a plain `Long`) rather than a cross-service entity relationship.
 - **Reactive gateway, servlet services** — the gateway uses Spring WebFlux (Netty) for non-blocking request routing. The business services use Spring MVC (Tomcat) with Spring Data JPA — the right stack for each concern.
 - **Shared JWT library** — token generation and validation logic lives in `jwt-common`, a shared Maven module. No duplication across services, no inter-service calls for validation.
