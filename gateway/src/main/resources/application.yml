@@ -7,16 +7,34 @@ spring:
         webflux:
           routes:
             - id: user-service
-              uri: ${USER_SERVICE_URL:http://localhost:8081}
+              uri: ${USER_SERVICE_URL}
               predicates:
                 - Path=/auth/**
             - id: application-service
-              uri: ${APPLICATION_SERVICE_URL:http://localhost:8082}
+              uri: ${APPLICATION_SERVICE_URL}
               predicates:
                 - Path=/applications/**
-
+            - id: user-service-docs
+              uri: ${USER_SERVICE_URL}
+              predicates:
+                - Path=/user-service/v3/api-docs
+              filters:
+                - RewritePath=/user-service/(?<segment>.*), /$\{segment}
+            - id: application-service-docs
+              uri: ${APPLICATION_SERVICE_URL}
+              predicates:
+                - Path=/application-service/v3/api-docs
+              filters:
+                - RewritePath=/application-service/(?<segment>.*), /$\{segment}
+springdoc:
+  swagger-ui:
+    urls:
+      - name: User Service
+        url: /user-service/v3/api-docs
+      - name: Application Service
+        url: /application-service/v3/api-docs
 server:
   port: 8080
 
 jwt:
-  secret: ${GATEWAY_JWT_SECRET:d8f2b1c9e4a7f6d0b5c8e2a1f9d4b7c3e6a0f8d2b5c9e1a4f7d0b3c6e9a2f5}
+  secret: ${GATEWAY_JWT_SECRET}

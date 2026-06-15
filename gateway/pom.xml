@@ -40,6 +40,11 @@
             <artifactId>spring-cloud-starter-gateway-server-webflux</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webflux-ui</artifactId>
+            <version>3.0.3</version>
+        </dependency>
+        <dependency>
             <groupId>com.jobtracker</groupId>
             <artifactId>jwt-common</artifactId>
             <version>0.0.1-SNAPSHOT</version>
