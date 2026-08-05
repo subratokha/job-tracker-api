@@ -1,0 +1,21 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: jobtracker-ingress
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - jobtracker.local
+      secretName: jobtracker-tls
+  rules:
+    - host: jobtracker.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: gateway-service
+                port:
+                  number: 8080
