@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gateway-service-config
+data:
+  USER_SERVICE_URL: http://user-service:8081
+  APPLICATION_SERVICE_URL: http://application-service:8082
