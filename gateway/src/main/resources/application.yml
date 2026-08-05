@@ -33,6 +33,17 @@ springdoc:
         url: /user-service/v3/api-docs
       - name: Application Service
         url: /application-service/v3/api-docs
+management:
+  endpoint:
+    health:
+      show-details: never
+      probes:
+        enabled: true
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
 server:
   port: 8080
 
