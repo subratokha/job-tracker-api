@@ -12,6 +12,7 @@ spec:
       labels:
         app: application-service
     spec:
+      serviceAccountName: application-service-account
       containers:
         - name: application-service
           image: job-tracker-application-service:v3

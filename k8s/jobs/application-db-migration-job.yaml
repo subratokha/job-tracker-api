@@ -1,0 +1,49 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: application-db-migration
+
+spec:
+  parallelism: 1
+  completions: 1
+  backoffLimit: 3
+
+  template:
+    spec:
+      restartPolicy: Never
+
+      containers:
+        - name: migration
+          image: postgres:16
+
+          env:
+            - name: PGHOST
+              value: postgres-application-service
+
+            - name: PGPORT
+              value: "5432"
+
+            - name: PGDATABASE
+              value: application_service
+
+            - name: PGUSER
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-application-secret
+                  key: POSTGRES_USER
+
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-application-secret
+                  key: POSTGRES_PASSWORD
+
+          command:
+            - sh
+            - -c
+            - |
+              psql \
+                -c "CREATE TABLE IF NOT EXISTS job_skills (
+                  id BIGSERIAL PRIMARY KEY,
+                  name VARCHAR(255) NOT NULL
+                );"
