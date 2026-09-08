@@ -1,0 +1,14 @@
+replicaCount: 3
+
+image:
+  repository: job-tracker-application-service
+  tag: v4
+  pullPolicy: IfNotPresent
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 768Mi

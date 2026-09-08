@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "postgresApplication.serviceName" . }}
+spec:
+  clusterIP: None
+  selector:
+    app.kubernetes.io/name: postgres-application
+    app.kubernetes.io/instance: "{{ .Release.Name }}"
+  ports:
+    - port: 5432
+      targetPort: 5432
