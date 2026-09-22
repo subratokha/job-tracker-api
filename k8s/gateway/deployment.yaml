@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: gateway-service
+  namespace: jobtracker-dev
 spec:
   replicas: 1
   selector:
@@ -11,6 +12,7 @@ spec:
     metadata:
       labels:
         app: gateway-service
+        network-role: jobtracker-app
     spec:
       containers:
         - name: gateway-service

@@ -8,12 +8,14 @@ COPY application-service/src ./application-service/src
 COPY jwt-common/pom.xml ./jwt-common/
 COPY user-service/pom.xml ./user-service/
 COPY gateway/pom.xml ./gateway/
-RUN mvn -pl application-service clean package -DskipTests
+RUN mvn -pl application-service -am clean package -DskipTests
 
 #Stage 2 - runtime
 FROM eclipse-temurin:21-jre
 WORKDIR /app
+RUN groupadd --system appgroup && useradd --system --gid appgroup --create-home appuser
 LABEL maintainer="shubrato1@gmail.com"
 LABEL description="Application Service Application"
-COPY --from=build /app/application-service/target/application-service-0.0.1-SNAPSHOT.jar app.jar
+COPY --from=build --chown=appuser:appgroup /app/application-service/target/application-service-0.0.1-SNAPSHOT.jar app.jar
+USER appuser
 ENTRYPOINT ["java", "-jar", "app.jar"]

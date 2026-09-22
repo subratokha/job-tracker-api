@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+
+metadata:
+  name: allow-application-egress
+  namespace: jobtracker-dev
+
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: application-service
+
+  policyTypes:
+    - Egress
+
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: postgres-application
+      ports:
+        - protocol: TCP
+          port: 5432

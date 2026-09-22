@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: "{{ .Release.Name }}-application-service"
+  namespace: "{{ .Release.Namespace }}"
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
@@ -15,6 +16,7 @@ spec:
         app.kubernetes.io/instance: "{{ .Release.Name }}"
         app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
         app.kubernetes.io/managed-by: "{{ .Release.Service }}"
+        network-role: jobtracker-app
     spec:
       serviceAccountName: "{{ .Release.Name }}-application-service-account"
       tolerations:
@@ -59,17 +61,26 @@ spec:
           labelSelector:
             matchLabels:
               app.kubernetes.io/name: application-service
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: application-service
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: "{{ .Values.image.pullPolicy }}"
           securityContext:
             runAsNonRoot: true
+            runAsUser: 999
+            runAsGroup: 999
             allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
             privileged: false
             capabilities:
               drop:
                 - ALL
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
           ports:
             - containerPort: 8082
           envFrom:
@@ -107,3 +118,6 @@ spec:
             limits:
               cpu: "{{ .Values.resources.limits.cpu }}"
               memory: "{{ .Values.resources.limits.memory }}"
+      volumes:
+        - name: tmp
+          emptyDir: { }

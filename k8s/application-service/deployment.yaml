@@ -13,6 +13,8 @@ spec:
         app: application-service
     spec:
       serviceAccountName: application-service-account
+      nodeSelector:
+        workload: application
       containers:
         - name: application-service
           image: job-tracker-application-service:v3
