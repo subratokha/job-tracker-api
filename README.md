@@ -34,9 +34,10 @@ The [`monolith-branch`](https://github.com/subratokha/job-tracker-api/tree/monol
 | Security | Spring Security, JWT (jjwt 0.12.6) |
 | Persistence | Spring Data JPA, Hibernate, PostgreSQL 16 |
 | Build | Maven (multi-module monorepo) |
-| Containerisation | Docker, Docker Compose |
+| Containerisation | Docker, Docker Compose, Kubernetes (with StatefulSets) |
+| Orchestration | Kubernetes with Ingress, TLS, and ELK logging stack |
 | API Docs | SpringDoc OpenAPI 3 (aggregated at gateway) |
-| Testing | JUnit 5, Mockito, MockMvc, DataJpaTest, H2 |
+| Testing | JUnit 5, Mockito, MockMvc, @SpringBootTest, H2 in-memory database |
 | CI | GitHub Actions |
 
 ---
@@ -260,8 +261,11 @@ Multi-module Maven monorepo. Each service is independently buildable and deploya
 ```
 job-tracker-api/
 ├── jwt-common/                         Shared JWT library (generation + validation)
-│   └── src/main/java/com/jobtracker/jwt/
-│       └── JwtService.java
+│   ├── src/main/java/com/jobtracker/jwt/
+│   │   └── JwtService.java
+│   ├── src/test/java/com/jobtracker/common/security/
+│   │   └── JwtServiceTest.java
+│   └── pom.xml
 │
 ├── user-service/                       Authentication and user management (port 8081)
 │   ├── src/main/java/com/jobtracker/user/
@@ -272,6 +276,12 @@ job-tracker-api/
 │   │   ├── dto/                        RegisterRequest, AuthRequest, AuthResponse
 │   │   ├── exception/                  GlobalExceptionHandler, custom exceptions
 │   │   └── security/                   SecurityConfig
+│   ├── src/test/java/com/jobtracker/user/
+│   │   ├── controller/                 AuthControllerTest
+│   │   ├── service/                    UserServiceTest
+│   │   └── repository/                 UserRepositoryTest
+│   ├── src/test/resources/
+│   │   └── application-test.properties H2 database config for testing
 │   ├── Dockerfile
 │   └── pom.xml
 │
@@ -283,6 +293,12 @@ job-tracker-api/
 │   │   ├── model/                      JobApplication, ApplicationStatus
 │   │   ├── dto/                        JobApplicationRequest, JobApplicationResponse
 │   │   └── exception/                  GlobalExceptionHandler, ResourceNotFoundException
+│   ├── src/test/java/com/jobtracker/application/
+│   │   ├── controller/                 JobApplicationControllerTest
+│   │   ├── service/                    JobApplicationServiceTest
+│   │   └── repository/                 JobApplicationRepositoryTest
+│   ├── src/test/resources/
+│   │   └── application-test.properties H2 database config for testing
 │   ├── Dockerfile
 │   └── pom.xml
 │
@@ -295,7 +311,19 @@ job-tracker-api/
 │   ├── Dockerfile
 │   └── pom.xml
 │
-├── docker-compose.yml                  Orchestrates all 5 containers
+├── k8s/                                Kubernetes deployment files
+│   ├── namespace.yaml                  Kubernetes namespace definition
+│   ├── ingress.yaml                    API Gateway ingress configuration (HTTPS)
+│   ├── user-service/                   User Service deployment files
+│   ├── application-service/            Application Service deployment files
+│   ├── postgres-user/                  User Service database StatefulSet
+│   ├── postgres-application/           Application Service database StatefulSet
+│   ├── gateway/                        Gateway deployment files
+│   ├── logging/                        ELK stack for centralized logging
+│   ├── certs/                          TLS certificates
+│   └── tls-secret.yaml                 Kubernetes TLS secret configuration
+│
+├── docker-compose.yml                  Docker Compose orchestration (5 containers)
 ├── .env.example                        Environment variable template
 └── pom.xml                             Parent pom — manages all modules
 ```
@@ -340,3 +368,108 @@ Tests run against H2 in-memory database — no Postgres required in CI.
 # Run tests for a specific service
 ./mvnw -pl user-service -am clean test
 ```
+
+---
+
+## Testing
+
+All services have comprehensive test coverage for controllers, services, and repositories. Tests run against an in-memory H2 database, so no Postgres is needed.
+
+### Test Structure
+
+**JWT Common Module** (5 tests)
+- Token generation with email and userId
+- Token validation and expiration
+- UserId extraction from token
+
+**User Service** (12 tests)
+- AuthControllerTest: Registration and login scenarios (5 tests)
+- UserServiceTest: Business logic for user management (5 tests)
+- UserRepositoryTest: Database queries for user lookup (2 tests)
+
+**Application Service** (23 tests)
+- JobApplicationControllerTest: REST endpoint validation and authorization (9 tests)
+- JobApplicationServiceTest: Business logic for CRUD operations (9 tests)
+- JobApplicationRepositoryTest: Database queries for user-scoped data access (5 tests)
+
+### Test Configuration
+
+Each service has its own test properties file:
+
+```properties
+# application-test.properties
+spring.datasource.url=jdbc:h2:mem:testdb
+spring.jpa.hibernate.ddl-auto=create-drop
+server.port=0
+```
+
+**Key annotations used:**
+- `@SpringBootTest` — loads full Spring context for integration tests
+- `@ExtendWith(MockitoExtension.class)` — lightweight unit tests with mocks
+- `@Transactional` — automatic rollback after each test for database isolation
+- `@TestPropertySource` — loads test-specific configuration
+
+### Test Coverage
+
+- **Total: 40 passing tests (100%)**
+- Controller tests validate HTTP status codes and request/response formats
+- Service tests verify business logic with mocked dependencies
+- Repository tests ensure correct database queries using real entities
+
+### Spring Boot 4.0 Compatibility
+
+This project uses Spring Boot 4.0.6 with Spring Framework 7.0. Test annotations have been updated for compatibility:
+- Replaced `@WebMvcTest` with `@ExtendWith(MockitoExtension.class)` + `MockMvcBuilders.standaloneSetup()`
+- Replaced `@DataJpaTest` with `@SpringBootTest` + `@Transactional`
+- Each repository test loads the full Spring context with H2 for realistic query testing
+
+---
+
+## Kubernetes Deployment
+
+The `k8s/` folder contains all Kubernetes configuration files for production deployment.
+
+### Components
+
+| File/Folder | Purpose |
+|---|---|
+| `namespace.yaml` | Kubernetes namespace (`job-tracker`) |
+| `user-service/` | User Service StatefulSet and Service |
+| `application-service/` | Application Service StatefulSet and Service |
+| `gateway/` | Gateway Deployment and Service |
+| `postgres-user/` | User Service database StatefulSet |
+| `postgres-application/` | Application Service database StatefulSet |
+| `ingress.yaml` | HTTPS ingress with TLS termination |
+| `logging/` | Elasticsearch, Logstash, Kibana (ELK stack) for centralized logging |
+
+### Deploy to Kubernetes
+
+```bash
+# Create namespace
+kubectl apply -f k8s/namespace.yaml
+
+# Deploy databases
+kubectl apply -f k8s/postgres-user/
+kubectl apply -f k8s/postgres-application/
+
+# Deploy services
+kubectl apply -f k8s/user-service/
+kubectl apply -f k8s/application-service/
+kubectl apply -f k8s/gateway/
+
+# Setup ingress and TLS
+kubectl apply -f k8s/tls-secret.yaml
+kubectl apply -f k8s/ingress.yaml
+
+# (Optional) Deploy logging
+kubectl apply -f k8s/logging/
+```
+
+### Access
+
+```
+HTTPS: https://your-domain.com/api
+Kibana (if logging deployed): http://your-cluster-ip:5601
+```
+
+---

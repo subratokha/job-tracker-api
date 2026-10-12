@@ -1,8 +1,8 @@
 replicaCount: 3
 
 image:
-  repository: job-tracker-application-service
-  tag: v4
+  repository: jobtracker-application-service
+  tag: v5
   pullPolicy: IfNotPresent
 
 resources:
